@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { getServerStatus } from '@/app/actions/minecraft';
+import { getServerStatus, getMinecraftServerIP } from '@/app/actions/minecraft';
 import { isServerReleased } from '@/utils/server';
 
 interface ServerStatus {
@@ -26,7 +26,7 @@ export default function StatusPage() {
     const fetchStatus = async () => {
       try {
         const result = await getServerStatus();
-        console.log('Client received status:', result); // Debug-Log
+     
         if (result.success) {
           setServerStatus(result.data);
         } else {
@@ -44,8 +44,18 @@ export default function StatusPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // IP-Anzeige Komponente
+ 
   const ServerIPDisplay = () => {
+    const [serverIP, setServerIP] = useState<string>('');
+
+    useEffect(() => {
+      const loadServerIP = async () => {
+        const ip = await getMinecraftServerIP();
+        setServerIP(ip);
+      };
+      loadServerIP();
+    }, []);
+
     if (!isServerReleased()) {
       return (
         <div className="border-b border-gray-700 pb-4">
@@ -63,7 +73,7 @@ export default function StatusPage() {
     return (
       <div className="border-b border-gray-700 pb-4">
         <h2 className="text-lg text-gray-400 mb-2">Server IP</h2>
-        <p className="text-white">minecraft.chaosly.de</p>
+        <p className="text-white">{serverIP}</p>
       </div>
     );
   };
@@ -71,13 +81,14 @@ export default function StatusPage() {
   // IP-Kopier-Button Komponente
   const CopyIPButton = () => {
     if (!isServerReleased()) {
-      return null; // Button wird nicht angezeigt vor Release
+      return null; 
     }
 
     return (
       <button
-        onClick={() => {
-          navigator.clipboard.writeText('minecraft.chaosly.de');
+        onClick={async () => {
+          const serverIP = await getMinecraftServerIP();
+          navigator.clipboard.writeText(serverIP);
           alert('Server IP kopiert!');
         }}
         className="bg-gray-700 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"

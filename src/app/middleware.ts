@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import jwt from 'jsonwebtoken';
 
-// Pfade die ohne Auth zugänglich sein sollen
+
 const PUBLIC_PATHS = [
   '/api/whitelist/auth',
   '/api/grieflist/auth',
@@ -18,19 +18,18 @@ export function middleware(request: NextRequest) {
   response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  // OPTIONS requests immer durchlassen (für CORS)
+
   if (request.method === 'OPTIONS') {
     return response;
   }
 
   const path = request.nextUrl.pathname;
 
-  // Öffentliche Pfade durchlassen
   if (PUBLIC_PATHS.some(publicPath => path.startsWith(publicPath))) {
     return response;
   }
 
-  // Token aus Header extrahieren
+
   const token = request.headers.get('Authorization')?.split('Bearer ')[1];
 
   if (!token) {
@@ -41,10 +40,9 @@ export function middleware(request: NextRequest) {
   }
 
   try {
-    // Token verifizieren
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role?: string };
     
-    // Admin-only Routen prüfen
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role?: string };
+ 
     if (path.includes('/admin') && decoded.role !== 'admin') {
       return NextResponse.json(
         { error: 'Keine Berechtigung' },

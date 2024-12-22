@@ -91,7 +91,7 @@ export default function AdminWhitelistPage() {
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
-    window.location.reload(); // Seite neu laden, um zum Login zurückzukehren
+    window.location.reload(); 
   };
 
   return (
