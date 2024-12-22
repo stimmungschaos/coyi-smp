@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isUpdateDay } from '@/app/utils/dates';
 import { getGrieflist } from '@/app/actions/grieflist';
-import { GrieflistEntry } from '@/types/api';
+import { GrieflistEntry, Consents } from '@/types/api';
 
 export default function GrieflistPage() {
   const [entries, setEntries] = useState<GrieflistEntry[]>([]);

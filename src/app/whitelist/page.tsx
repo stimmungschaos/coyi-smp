@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitWhitelist } from '../actions/whitelist';
+import { ApiResponse } from '@/types/api';
 
 export default function WhitelistPage() {
   const [minecraftName, setMinecraftName] = useState('');

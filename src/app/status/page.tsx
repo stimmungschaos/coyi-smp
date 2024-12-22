@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { getServerStatus } from '@/app/actions/minecraft';
+import { isServerReleased } from '@/utils/server';
 
 export default function StatusPage() {
   const [serverStatus, setServerStatus] = useState<any>(null);
