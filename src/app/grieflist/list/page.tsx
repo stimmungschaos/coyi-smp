@@ -3,22 +3,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { isUpdateDay } from '@/app/utils/dates';
-
-interface Consents {
-  pvp: boolean;
-  griefing: boolean;
-  stealing: boolean;
-  trapping: boolean;
-  petKilling: boolean;
-  nothingAllowed: boolean;
-}
-
-interface GrieflistEntry {
-  id: number;
-  minecraft_name: string;
-  consents: Consents;
-  last_updated: string;
-}
+import { getGrieflist } from '@/app/actions/grieflist';
+import { GrieflistEntry } from '@/types/api';
 
 export default function GrieflistPage() {
   const [entries, setEntries] = useState<GrieflistEntry[]>([]);
@@ -40,15 +26,9 @@ export default function GrieflistPage() {
 
   const fetchEntries = async () => {
     try {
-      const token = localStorage.getItem('grieflist_token');
-      const response = await fetch('/api/grieflist', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setEntries(data);
+      const result = await getGrieflist();
+      if (result.success && result.data) {
+        setEntries(result.data);
       }
     } catch (error) {
       console.error('Fehler beim Laden der Einträge:', error);

@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { submitGrieflist } from '@/app/actions/grieflist';
 
 interface ConsentOptions {
   pvp: boolean;
@@ -48,32 +49,18 @@ export default function GrieflistSubmitPage() {
     e.preventDefault();
     setMessage('');
 
-    const token = localStorage.getItem('grieflist_token');
-    if (!token) {
-      router.push('/grieflist/login');
-      return;
-    }
-
     try {
-      console.log('Sending data:', { consents });
-      
-      const response = await fetch('/api/grieflist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ consents })
+      const result = await submitGrieflist({
+        minecraft_name: minecraftName,
+        consents,
+        ipAddress: window.location.hostname
       });
 
-      const data = await response.json();
-      console.log('Response:', data);
-      
-      if (response.ok) {
-        setMessage(data.message);
+      if (result.success) {
+        setMessage(result.message || 'Erfolgreich gespeichert!');
         router.push('/grieflist/list');
       } else {
-        setMessage(data.error);
+        setMessage(result.error || 'Ein Fehler ist aufgetreten');
       }
     } catch (error) {
       console.error('Submit error:', error);

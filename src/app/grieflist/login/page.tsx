@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { loginGrieflist } from '@/app/actions/grieflist';
 
 export default function GrieflistLoginPage() {
   const [minecraftName, setMinecraftName] = useState('');
@@ -12,22 +13,16 @@ export default function GrieflistLoginPage() {
     setError('');
 
     try {
-      const response = await fetch('/api/grieflist/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ minecraft_name: minecraftName }),
+      const result = await loginGrieflist({
+        minecraft_name: minecraftName,
+        ipAddress: window.location.hostname
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('grieflist_token', data.token);
-        // Wenn neuer Benutzer, zum Formular, sonst zur Übersicht
-        router.push(data.isNewUser ? '/grieflist/submit' : '/grieflist/list');
+      if (result.success && result.data) {
+        localStorage.setItem('grieflist_token', result.data.token);
+        router.push(result.data.isNewUser ? '/grieflist/submit' : '/grieflist/list');
       } else {
-        setError(data.error || 'Login fehlgeschlagen');
+        setError(result.error || 'Login fehlgeschlagen');
       }
     } catch (error) {
       setError('Ein Fehler ist aufgetreten');

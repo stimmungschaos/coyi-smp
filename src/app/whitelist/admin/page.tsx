@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
-
-interface WhitelistEntry {
-  id: number;
-  minecraft_name: string;
-  discord_name: string;
-  created_at: string;
-}
+import { WhitelistEntry } from '@/types/api';
+import { 
+  getWhitelistEntries, 
+  deleteWhitelistEntry, 
+  updateWhitelistEntry,
+  deleteWhitelistByCondition 
+} from '@/app/actions/whitelist-admin';
 
 export default function AdminWhitelistPage() {
   const [entries, setEntries] = useState<WhitelistEntry[]>([]);
@@ -28,15 +28,9 @@ export default function AdminWhitelistPage() {
   }, []);
 
   const fetchEntries = async () => {
-    try {
-      const response = await fetch('/api/whitelist/list');
-      if (!response.ok) throw new Error('Fehler beim Laden der Einträge');
-      const data = await response.json();
-      
-      const sortedData = data.sort((a: WhitelistEntry, b: WhitelistEntry) => b.id - a.id);
-      setEntries(sortedData);
-    } catch (err) {
-      console.error('Fehler beim Laden:', err);
+    const result = await getWhitelistEntries();
+    if (result.success && result.data) {
+      setEntries(result.data);
     }
   };
 
@@ -50,12 +44,13 @@ export default function AdminWhitelistPage() {
 
   const handleDelete = async (id: number) => {
     try {
-      const response = await fetch(`/api/whitelist/admin/${id}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) throw new Error('Fehler beim Löschen');
-      fetchEntries();
-      setDeleteDialog({ show: false, id: null });
+      const result = await deleteWhitelistEntry(id);
+      if (result.success) {
+        fetchEntries();
+        setDeleteDialog({ show: false, id: null });
+      } else {
+        alert(result.error || 'Fehler beim Löschen');
+      }
     } catch (err) {
       console.error('Fehler:', err);
       alert('Fehler beim Löschen des Eintrags');
@@ -72,21 +67,17 @@ export default function AdminWhitelistPage() {
     if (!editingEntry) return;
 
     try {
-      const response = await fetch(`/api/whitelist/admin/${editingEntry.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          minecraft_name: editMinecraftName,
-          discord_name: editDiscordName,
-        }),
+      const result = await updateWhitelistEntry(editingEntry.id, {
+        minecraft_name: editMinecraftName,
+        discord_name: editDiscordName,
       });
 
-      if (!response.ok) throw new Error('Fehler beim Aktualisieren');
-      
-      fetchEntries();
-      setEditingEntry(null);
+      if (result.success) {
+        fetchEntries();
+        setEditingEntry(null);
+      } else {
+        alert(result.error || 'Fehler beim Aktualisieren');
+      }
     } catch (err) {
       console.error('Fehler:', err);
       alert('Fehler beim Aktualisieren des Eintrags');

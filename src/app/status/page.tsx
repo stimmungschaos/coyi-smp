@@ -1,54 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
-
-interface ServerStatus {
-  online: boolean;
-  server: {
-    name: string;
-    protocol: number;
-  };
-  players: {
-    max: number;
-    now: number;
-    sample: any[];
-  };
-  motd: string;
-  motd_json: string;
-}
-
-// Neue Hilfsfunktion zur Überprüfung des Release-Status
-function isServerReleased(): boolean {
-  const releaseDate = new Date('2024-12-27T00:00:00');
-  const now = new Date();
-  return now >= releaseDate;
-}
+import { getServerStatus } from '@/app/actions/minecraft';
 
 export default function StatusPage() {
-  const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
+  const [serverStatus, setServerStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const response = await fetch('/api/minecraft');
-        const data = await response.json();
-        
-        const formattedData = {
-          online: data.online,
-          server: {
-            name: data.server?.name || 'Unknown',
-            protocol: data.server?.protocol || 0
-          },
-          players: {
-            max: data.players?.max || 0,
-            now: data.players?.now || 0,
-            sample: data.players?.sample || []
-          },
-          motd: data.motd || '',
-          motd_json: data.motd_json || ''
-        };
-        
-        setServerStatus(formattedData);
+        const result = await getServerStatus();
+        if (result.success) {
+          setServerStatus(result.data);
+        }
       } catch (error) {
         console.error('Fehler beim Laden des Server-Status:', error);
       } finally {
@@ -57,7 +21,7 @@ export default function StatusPage() {
     };
 
     fetchStatus();
-    const interval = setInterval(fetchStatus, 60000);
+    const interval = setInterval(fetchStatus, 30000);
     return () => clearInterval(interval);
   }, []);
 
