@@ -8,11 +8,23 @@ export function hashIP(ip: string): string {
     .digest('hex');
 }
 
-export function verifyAdminToken(token: string): boolean {
+export function generateToken(payload: any, expiresIn: string = '7d') {
+  return jwt.sign(
+    payload,
+    process.env.JWT_SECRET!,
+    { expiresIn }
+  );
+}
+
+export function verifyToken(token: string): any {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { role: string };
-    return decoded.role === 'admin';
+    return jwt.verify(token, process.env.JWT_SECRET!);
   } catch {
-    return false;
+    return null;
   }
+}
+
+export function verifyAdminToken(token: string): boolean {
+  const decoded = verifyToken(token);
+  return decoded?.role === 'admin';
 } 

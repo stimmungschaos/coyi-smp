@@ -40,7 +40,12 @@ export default function GrieflistPage() {
 
   const fetchEntries = async () => {
     try {
-      const response = await fetch('/api/grieflist');
+      const token = localStorage.getItem('grieflist_token');
+      const response = await fetch('/api/grieflist', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setEntries(data);

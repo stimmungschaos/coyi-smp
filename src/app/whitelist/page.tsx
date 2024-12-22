@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { submitWhitelist } from '../actions/whitelist';
 
 export default function WhitelistPage() {
   const [minecraftName, setMinecraftName] = useState('');
@@ -24,29 +25,22 @@ export default function WhitelistPage() {
     setSuccess('');
 
     try {
-      const response = await fetch('/api/whitelist', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          minecraftName,
-          discordName,
-        }),
+      const result = await submitWhitelist({
+        minecraftName,
+        discordName,
+        ipAddress: window.location.hostname
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Ein Fehler ist aufgetreten');
+      if (result.success) {
+        setSuccess(result.message);
+        setMinecraftName('');
+        setDiscordName('');
+        router.refresh();
+      } else {
+        setError(result.error);
       }
-
-      setSuccess('Du wurdest erfolgreich zur Whitelist hinzugefügt!');
-      setMinecraftName('');
-      setDiscordName('');
-      router.refresh();
     } catch (err: any) {
-      setError(err.message);
+      setError('Ein Fehler ist aufgetreten');
     } finally {
       setLoading(false);
     }
