@@ -1,7 +1,14 @@
-import type { NextConfig } from "next";
+// next.config.ts
+import { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const config: NextConfig = {
+  reactStrictMode: true,
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  env: {
+    MINECRAFT_SERVER_IP: process.env.MINECRAFT_SERVER_IP,
+  }
 };
 
-export default nextConfig;
+export default config;
