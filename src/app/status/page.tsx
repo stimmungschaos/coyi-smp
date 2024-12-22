@@ -3,16 +3,34 @@ import { useState, useEffect } from 'react';
 import { getServerStatus } from '@/app/actions/minecraft';
 import { isServerReleased } from '@/utils/server';
 
+interface ServerStatus {
+  online: boolean;
+  server: {
+    name: string;
+    protocol: number;
+  };
+  players: {
+    max: number;
+    now: number;
+    sample: any[];
+  };
+  motd: string;
+  favicon: string;
+}
+
 export default function StatusPage() {
-  const [serverStatus, setServerStatus] = useState<any>(null);
+  const [serverStatus, setServerStatus] = useState<ServerStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
         const result = await getServerStatus();
+        console.log('Client received status:', result); // Debug-Log
         if (result.success) {
           setServerStatus(result.data);
+        } else {
+          console.error('Server status fetch failed:', result.error);
         }
       } catch (error) {
         console.error('Fehler beim Laden des Server-Status:', error);
@@ -99,24 +117,33 @@ export default function StatusPage() {
           <div className="grid gap-6">
             <div className="border-b border-gray-700 pb-4">
               <h2 className="text-lg text-gray-400 mb-2">Server Version</h2>
-              <p className="text-white">{serverStatus?.server.name}</p>
+              <p className="text-white">{serverStatus?.server?.name || 'Purpur 1.21.1'}</p>
             </div>
 
             <div className="border-b border-gray-700 pb-4">
               <h2 className="text-lg text-gray-400 mb-2">Spieler Online</h2>
               <p className="text-white">
-                {serverStatus?.players.now} / {serverStatus?.players.max}
+                {serverStatus?.players?.now || 0} / {serverStatus?.players?.max || 75}
               </p>
             </div>
 
             <ServerIPDisplay />
 
+            {serverStatus?.favicon && (
+              <div className="border-b border-gray-700 pb-4">
+                <h2 className="text-lg text-gray-400 mb-2">Server Icon</h2>
+                <img 
+                  src={serverStatus.favicon} 
+                  alt="Server Icon" 
+                  className="w-16 h-16"
+                />
+              </div>
+            )}
+
             <div className="border-b border-gray-700 pb-4">
               <h2 className="text-lg text-gray-400 mb-2">Server Description</h2>
               <p className="text-white whitespace-pre-line">
-                {serverStatus?.motd_json 
-                  ? "Willkommen beim coyi SMP"
-                  : 'Keine Nachricht verfügbar'}
+                {serverStatus?.motd || 'Keine Nachricht verfügbar'}
               </p>
             </div>
           </div>

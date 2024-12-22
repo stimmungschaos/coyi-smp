@@ -2,25 +2,42 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    // Implementierung der Minecraft-Server-Abfrage
+    const response = await fetch('https://mcapi.us/server/status?ip=minecraft.chaosly.de');
+    const mcapiResult = await response.json();
+    
+    console.log('mcapi.us response:', mcapiResult);
+    
     const data = {
-      online: true, // Beispieldaten
+      online: mcapiResult.online,
       server: {
-        name: "Paper 1.20.4",
-        protocol: 765
+        name: mcapiResult.server?.name || "Purpur 1.21.1",
+        protocol: mcapiResult.server?.protocol || 767
       },
       players: {
-        max: 20,
-        now: 0,
-        sample: []
+        max: mcapiResult.players?.max || 75,
+        now: mcapiResult.players?.now || 0,
+        sample: mcapiResult.players?.sample || []
       },
-      motd: "Willkommen beim coyi SMP",
-      motd_json: "Willkommen beim coyi SMP"
+      motd: mcapiResult.motd || "Willkommen beim coyi SMP",
+      favicon: mcapiResult.favicon || ""
     };
 
     return NextResponse.json(data);
   } catch (error) {
     console.error('Fehler bei der Server-Abfrage:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({
+      online: false,
+      server: {
+        name: "Purpur 1.21.1",
+        protocol: 767
+      },
+      players: {
+        max: 75,
+        now: 0,
+        sample: []
+      },
+      motd: "Server offline",
+      favicon: ""
+    });
   }
 } 

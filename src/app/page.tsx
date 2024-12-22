@@ -164,7 +164,7 @@ export default function Home() {
                 className="w-24 h-24 rounded-full mx-auto mb-4"
               />
               <h3 className="text-xl font-semibold text-white mb-2">okayyfiona</h3>
-              <p className="text-gray-400 mb-6">Plugin Entwicklerin [Group Chat]</p>
+              <p className="text-gray-400 mb-6">Plugin Entwicklerin </p>
               <div className="flex justify-center gap-4">
                 <a href="https://www.twitch.tv/okayyfiona/" target="_blank" rel="noopener noreferrer" 
                    className="text-gray-400 hover:text-white transition-colors">

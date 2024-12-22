@@ -4,27 +4,16 @@ import { ApiResponse } from '@/types/api';
 
 export async function getServerStatus(): Promise<ApiResponse> {
   try {
-    // Implementierung der Minecraft-Server-Abfrage
-    const data = {
-      online: true, // Beispieldaten
-      server: {
-        name: "Paper 1.20.4",
-        protocol: 765
-      },
-      players: {
-        max: 20,
-        now: 0,
-        sample: []
-      },
-      motd: "Willkommen beim coyi SMP",
-      motd_json: "Willkommen beim coyi SMP"
-    };
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/minecraft`);
+    const data = await response.json();
+    console.log('Server action received data:', data); // Debug-Log
 
     return {
       success: true,
       data
     };
   } catch (error) {
+    console.error('Server action error:', error);
     return {
       success: false,
       error: 'Fehler bei der Server-Abfrage'
