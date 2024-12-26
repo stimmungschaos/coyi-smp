@@ -93,4 +93,31 @@ export async function deleteWhitelistByCondition(data: {
       error: 'Fehler beim Löschen der Einträge'
     };
   }
+}
+
+export async function reorderWhitelistIds(): Promise<ApiResponse> {
+  try {
+    // Temporäre Tabelle erstellen und Daten kopieren
+    await pool.execute('CREATE TEMPORARY TABLE temp_whitelist SELECT minecraft_name, discord_name, created_at FROM whitelist ORDER BY id');
+    
+    // Originaltabelle leeren
+    await pool.execute('TRUNCATE TABLE whitelist');
+    
+    // Daten mit neuen IDs zurück kopieren
+    await pool.execute('INSERT INTO whitelist (minecraft_name, discord_name, created_at) SELECT minecraft_name, discord_name, created_at FROM temp_whitelist');
+    
+    // Temporäre Tabelle löschen
+    await pool.execute('DROP TEMPORARY TABLE temp_whitelist');
+
+    return {
+      success: true,
+      message: 'IDs wurden erfolgreich neu sortiert'
+    };
+  } catch (error) {
+    console.error('Fehler beim Neusortieren:', error);
+    return {
+      success: false,
+      error: 'Fehler beim Neusortieren der IDs'
+    };
+  }
 } 

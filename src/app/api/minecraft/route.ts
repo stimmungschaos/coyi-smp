@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const response = await fetch('https://mcapi.us/server/status?ip=minecraft.chaosly.de');
+    const response = await fetch('https://mcapi.us/server/status?ip=coyi.chaosly.de');
     const mcapiResult = await response.json();
     
     console.log('mcapi.us response:', mcapiResult);

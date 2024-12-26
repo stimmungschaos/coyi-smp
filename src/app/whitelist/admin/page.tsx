@@ -5,7 +5,8 @@ import {
   getWhitelistEntries, 
   deleteWhitelistEntry, 
   updateWhitelistEntry,
-  deleteWhitelistByCondition 
+  deleteWhitelistByCondition,
+  reorderWhitelistIds
 } from '@/app/actions/whitelist-admin';
 
 export default function AdminWhitelistPage() {
@@ -16,6 +17,10 @@ export default function AdminWhitelistPage() {
   const [editDiscordName, setEditDiscordName] = useState('');
   const [deleteDialog, setDeleteDialog] = useState<{ show: boolean; id: number | null }>({ show: false, id: null });
   const [skipDeleteConfirm, setSkipDeleteConfirm] = useState(false);
+  const [addDialog, setAddDialog] = useState(false);
+  const [newMinecraftName, setNewMinecraftName] = useState('');
+  const [newDiscordName, setNewDiscordName] = useState('');
+  const [isReordering, setIsReordering] = useState(false);
 
   useEffect(() => {
     fetchEntries();
@@ -94,17 +99,82 @@ export default function AdminWhitelistPage() {
     window.location.reload(); 
   };
 
+  const handleAdd = async () => {
+    try {
+      const result = await fetch('/api/whitelist/admin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          minecraft_name: newMinecraftName,
+          discord_name: newDiscordName,
+        }),
+      });
+
+      if (result.ok) {
+        fetchEntries();
+        setAddDialog(false);
+        setNewMinecraftName('');
+        setNewDiscordName('');
+      } else {
+        const data = await result.json();
+        alert(data.message || 'Fehler beim Hinzufügen');
+      }
+    } catch (err) {
+      console.error('Fehler:', err);
+      alert('Fehler beim Hinzufügen des Eintrags');
+    }
+  };
+
+  const handleReorderIds = async () => {
+    if (isReordering) return;
+    
+    setIsReordering(true);
+    try {
+      const result = await reorderWhitelistIds();
+      if (result.success) {
+        await fetchEntries();
+        alert(result.message);
+      } else {
+        alert(result.error || 'Fehler beim Neusortieren');
+      }
+    } catch (err) {
+      console.error('Fehler:', err);
+      alert('Fehler beim Neusortieren der IDs');
+    } finally {
+      setIsReordering(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 py-20">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-white">Whitelist Einträge</h1>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            Abmelden
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={handleReorderIds}
+              disabled={isReordering}
+              className={`bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors ${
+                isReordering ? 'opacity-50 cursor-not-allowed' : 'hover:bg-yellow-700'
+              }`}
+            >
+              {isReordering ? 'Sortiere...' : 'IDs neu sortieren'}
+            </button>
+            <button
+              onClick={() => setAddDialog(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Hinzufügen
+            </button>
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Abmelden
+            </button>
+          </div>
         </div>
 
         <div className="relative mb-8">
@@ -236,6 +306,53 @@ export default function AdminWhitelistPage() {
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors"
                   >
                     Speichern
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Add Modal */}
+        {addDialog && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md">
+              <h2 className="text-xl font-bold text-white mb-4">Neuen Eintrag hinzufügen</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-gray-300 mb-2">Minecraft Name</label>
+                  <input
+                    type="text"
+                    value={newMinecraftName}
+                    onChange={(e) => setNewMinecraftName(e.target.value)}
+                    className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-300 mb-2">Discord Name</label>
+                  <input
+                    type="text"
+                    value={newDiscordName}
+                    onChange={(e) => setNewDiscordName(e.target.value)}
+                    className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    onClick={() => {
+                      setAddDialog(false);
+                      setNewMinecraftName('');
+                      setNewDiscordName('');
+                    }}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500 transition-colors"
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    onClick={handleAdd}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-500 transition-colors"
+                  >
+                    Hinzufügen
                   </button>
                 </div>
               </div>
