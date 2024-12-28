@@ -7,6 +7,11 @@ export async function GET() {
     
     console.log('mcapi.us response:', mcapiResult);
     
+    const formattedSample = mcapiResult.players?.sample?.map((player: any) => ({
+      uuid: player.id,
+      name: player.name
+    })) || [];
+    
     const data = {
       online: mcapiResult.online,
       server: {
@@ -16,7 +21,7 @@ export async function GET() {
       players: {
         max: mcapiResult.players?.max || 75,
         now: mcapiResult.players?.now || 0,
-        sample: mcapiResult.players?.sample || []
+        sample: formattedSample
       },
       motd: mcapiResult.motd || "Willkommen beim coyi SMP",
       favicon: mcapiResult.favicon || ""

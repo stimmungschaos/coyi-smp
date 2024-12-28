@@ -3,8 +3,7 @@ import { useState, useEffect } from 'react';
 
 interface PlayerSample {
   uuid: string;
-  name_raw: string;
-  name_clean: string;
+  name: string;
 }
 
 interface ServerStatus {
@@ -16,7 +15,7 @@ interface ServerStatus {
   players: {
     max: number;
     now: number;
-    sample: any[];
+    sample: PlayerSample[];
   };
   motd: string;
   motd_json: string;
@@ -77,10 +76,10 @@ export default function PlayerListPage() {
                 >
                   <img 
                     src={`https://crafatar.com/avatars/${player.uuid}?size=48&overlay`}
-                    alt={`${player.name_raw}'s Avatar`}
+                    alt={`${player.name}'s Avatar`}
                     className="w-12 h-12 rounded"
                   />
-                  <span className="text-white text-lg">{player.name_clean}</span>
+                  <span className="text-white text-lg">{player.name}</span>
                 </div>
               ))
             ) : (
